@@ -1,11 +1,26 @@
 const express = require('express');
+const path = require('path');
 const app = express();
-const PORT = 8080;
 
-app.get('/', (req, res) => {
-    res.send('<h1>Docker & GitHub Actions automaatio toimii AWS-palvelimella! 🐳🚀</h1>');
+// --- 1. KAIKKI API-REITIT TÄHÄN YLÄREUNAAN ---
+app.get('/api/data', (req, res) => {
+  try {
+    // Lähetetään selkeä teksti, jonka Axios voi lukea
+    return res.status(200).send("Express-backend vastaa: Yhteys toimii lokaalisti! 🎉");
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send(e.message);
+  }
 });
 
-app.listen(PORT, () => {
-    console.log(`Palvelin pyörii kontissa portissa ${PORT}`);
+
+// --- 2. STAATTISET TIEDOSTOT JA TÄHTI-REITTI TÄHÄN ALAREUNAAN ---
+// Tämä linja saa olla tässä, mutta sen täytyy olla API-reittien alapuolella
+app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+// Tämä kaiken nappaava tähti pitää olla AIVAN ALIMMAISENA ennen app.listenia
+app.get('*splat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
 });
+
+app.listen(8080, () => console.log('Palvelin pyörii portissa 8080'));

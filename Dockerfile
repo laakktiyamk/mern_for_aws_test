@@ -1,18 +1,29 @@
-# 1. Käytetään virallista kevyttä Node-imagea
-FROM node:22-alpine
+# === VAIHE 1: Rakennetaan React (Vite) ===
+FROM node:22-alpine AS frontend-builder
+WORKDIR /usr/src/app/frontend
 
-# 2. Luodaan sovellukselle kansio kontin sisälle
+# Kopioidaan Viten pakettiluettelot ja asennetaan ne
+COPY frontend/package*.json ./
+RUN npm install
+
+# Kopioidaan Viten koodit ja rakennetaan tuotantoversio (npm run build luo dist-kansion)
+COPY frontend/ ./
+RUN npm run build
+
+# === VAIHE 2: Rakennetaan Express ===
+FROM node:22-alpine
 WORKDIR /usr/src/app
 
-# 3. Kopioidaan riippuvuuslistat ja asennetaan ne
+# Kopioidaan Expressin pakettiluettelot ja asennetaan vain tuotantopaketit
 COPY package*.json ./
 RUN npm install --only=production
 
-# 4. Kopioidaan kaikki loput kooditiedostot
+# Kopioidaan Expressin kooditiedostot
 COPY . .
 
-# 5. Avataan portti 8080 kontin sisältä ulos
-EXPOSE 8080
+# Kopioidaan valmis Vite-käännös VAIHEESTA 1 Expressin sisälle oikeaan paikkaan
+COPY --from=frontend-builder /usr/src/app/frontend/dist ./frontend/dist
 
-# 6. Komento, joka käynnistää palvelimen kontissa
+# Avataan portti ja käynnistetään palvelin
+EXPOSE 8080
 CMD [ "node", "index.js" ]
