@@ -9,7 +9,8 @@ function App() {
     const haeData = async () => {
       try {
         // Odotetaan, että Axios hakee tiedot backendistä
-        const vastaus = await axios.get('/api/data')
+        const backendUrl = window.location.origin; // Tämä poimii automaattisesti http://51.20.191.215
+        const vastaus = await axios.get(`${backendUrl}/api/data`);
         
         // Tallennetaan saatu vastaus tilaan
         setData(vastaus.data)
