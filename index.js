@@ -6,7 +6,7 @@ const app = express();
 app.get('/api/data', (req, res) => {
   try {
     // Lähetetään selkeä teksti, jonka Axios voi lukea
-    return res.status(200).send("Express-backend vastaa: Yhteys toimii lokaalisti! 🎉");
+    return res.status(200).send("Express-backend vastaa: Yhteys toimii!!!");
   } catch (e) {
     console.log(e.message);
     return res.status(500).send(e.message);
