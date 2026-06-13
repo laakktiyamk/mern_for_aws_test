@@ -45,9 +45,25 @@ mongoose.connect(mongoURI)
 
 
 // --- KAIKKI API-REITIT ---
-app.get('/api/data', (req, res) => {
+app.get('/api/data', async (req, res) => {
   try {
-    return res.status(200).send("Express-backend vastaa: Yhteys toimii lokaalisti! 🎉");
+    // 1. Tässä kohdassa LUETAAN kannasta kaikki viestit
+    let viestit = await Viesti.find();
+
+    // 2. Jos kanta oli tyhjä, hypätään tänne sisälle
+    if (viestit.length === 0) {
+      
+      // Tässä luodaan uusi tieto Noden muistiin:
+      const uusiViesti = new Viesti({ teksti: "Tämä on ensimmäinen viestisi MongoDB Atlas -pilvestä! 🍃" });
+      
+      // TÄSSÄ KOHTAA KIRJOITETAAN KANTAAN! (Tieto tallentuu pilveen livenä)
+      await uusiViesti.save(); 
+      
+      viestit = [uusiViesti];
+    }
+
+    // 3. Lähetetään haettu tai luotu tieto takaisin Reactille
+    return res.status(200).send(viestit[0].teksti);
   } catch (e) {
     console.log(e.message);
     return res.status(500).send(e.message);
