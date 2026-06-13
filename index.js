@@ -44,6 +44,13 @@ mongoose.connect(mongoURI)
   .catch((virhe) => console.log('MongoDB yhteysvirhe:', virhe.message));
 
 
+const ViestiSchema = new mongoose.Schema({
+  teksti: String,
+  pvm: { type: Date, default: Date.now }
+});
+
+const Viesti = mongoose.model('Viesti', ViestiSchema);
+
 // --- KAIKKI API-REITIT ---
 app.get('/api/data', async (req, res) => {
   try {
