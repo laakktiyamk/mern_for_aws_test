@@ -33,9 +33,10 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/express-kokeilu:latest
 
+  # === UUSI AUTOMAATTINEN KÄYTTÖÖNOTTOVAIHE ===
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Tämä vaihe käynnistyy vasta, kun build-vaihe on valmis
 
     steps:
     - name: Executing remote ssh commands to deploy
@@ -45,17 +46,17 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # 1. Pysäytetään vanha kontti
+          # 1. Pysäytetään vanha kontti jos se on käynnissä (|| true estää kaatumisen jos konttia ei löydy)
           docker stop express-kokeilu || true
           
-          # 2. Poistetaan vanha kontti alta pois
+          # 2. Poistetaan vanha kontti
           docker rm express-kokeilu || true
           
-          # 3. Ladataan uusin versio Docker Hubista
+          # 3. Ladattataan uusin konttiversio Docker Hubista palvelimelle
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/express-kokeilu:latest
           
-          # 4. Käynnistetään kontti ja syötetään sille tietokantaosoite ympäristömuuttujana
-          docker run -d -p 80:8080 -e MONGO_URI="${{ secrets.MONGO_URI }}" --name express-kokeilu ${{ secrets.DOCKERHUB_USERNAME }}/express-kokeilu:latest
+          # 4. Käynnistetään uusi kontti taustalle porttiin 80
+          docker run -d -p 80:8080 --name express-kokeilu ${{ secrets.DOCKERHUB_USERNAME }}/express-kokeilu:latest
           
           # 5. Siivotaan vanhat turhat imaget tilaa viemästä
           docker image prune -f
